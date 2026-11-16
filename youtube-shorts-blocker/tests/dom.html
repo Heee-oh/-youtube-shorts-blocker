@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Shorts DOM regression check</title>
+  <link rel="stylesheet" href="../content.css">
+</head>
+<body>
+  <ytd-guide-entry-renderer id="shorts-menu"><a href="/shorts">Shorts</a></ytd-guide-entry-renderer>
+  <ytd-rich-item-renderer id="shorts-card"><a href="/shorts/abc">Short</a></ytd-rich-item-renderer>
+  <yt-lockup-view-model id="new-shorts-card"><a href="https://www.youtube.com/shorts/abc">Short</a></yt-lockup-view-model>
+  <ytd-rich-section-renderer id="shorts-section"><ytd-reel-shelf-renderer>Shorts shelf</ytd-reel-shelf-renderer></ytd-rich-section-renderer>
+  <ytd-rich-section-renderer id="new-shorts-section"><ytd-rich-shelf-renderer is-shorts>Shorts shelf</ytd-rich-shelf-renderer></ytd-rich-section-renderer>
+  <ytd-rich-section-renderer id="normal-section"><ytd-rich-shelf-renderer>Ordinary videos</ytd-rich-shelf-renderer></ytd-rich-section-renderer>
+  <ytd-rich-item-renderer id="normal-card"><a href="/watch?v=abc">Ordinary video</a></ytd-rich-item-renderer>
+  <ytd-guide-entry-renderer id="subscriptions"><a href="/feed/subscriptions">Subscriptions</a></ytd-guide-entry-renderer>
+  <ytd-tab-renderer id="channel-shorts"><a href="/@creator/shorts">Channel tab remains available</a></ytd-tab-renderer>
+  <a id="ordinary-text-link" href="/results?search_query=shorts">Search</a>
+  <pre id="result">RUNNING</pre>
+  <script>
+    window.addEventListener("load", () => {
+      const failures = [];
+      function check(id, hidden) {
+        const actual = getComputedStyle(document.getElementById(id)).display === "none";
+        if (actual !== hidden) failures.push(id);
+      }
+      for (const id of ["shorts-menu", "shorts-card", "new-shorts-card", "shorts-section", "new-shorts-section"]) check(id, true);
+      for (const id of ["normal-section", "normal-card", "subscriptions", "channel-shorts", "ordinary-text-link"]) check(id, false);
+      const card = document.createElement("ytd-rich-item-renderer");
+      card.id = "dynamic-card";
+      card.innerHTML = '<a href="/shorts/new">Dynamically inserted short</a>';
+      document.body.append(card);
+      check("dynamic-card", true);
+      card.querySelector("a").href = "/watch?v=normal";
+      check("dynamic-card", false);
+      document.getElementById("result").textContent = failures.length ? "FAIL: " + failures.join(", ") : "PASS: 12 DOM checks";
+    });
+  </script>
+</body>
+</html>
